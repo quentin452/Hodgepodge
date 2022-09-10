@@ -165,6 +165,7 @@ public enum Mixins {
             Side.CLIENT,
             () -> Common.config.hidePotionParticlesFromSelf,
             TargetedMod.VANILLA),
+    FORCE_NO_UNICODE("minecraft.MixinMinecraft_ForceNoUnicode", Side.CLIENT, () -> true, TargetedMod.VANILLA),
 
     // Potentially obsolete vanilla fixes
     GRASS_GET_BLOCK_FIX(
