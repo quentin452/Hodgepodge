@@ -50,6 +50,11 @@ public enum Mixins {
     FIX_HASTE_ARM_SWING_ANIMATION(new Builder("Fix arm not swinging when having too much haste").setPhase(Phase.EARLY)
             .addMixinClasses("minecraft.MixinEntityLivingBase_FixHasteArmSwing").setSide(Side.BOTH)
             .setApplyIf(() -> Common.config.fixHasteArmSwing).addTargetedMod(TargetedMod.VANILLA)),
+
+    DISABLE_REALMS_BUTTON(new Builder("Disable Realms button in main menu").setPhase(Phase.EARLY)
+            .addMixinClasses("minecraft.MixinGuiMainMenu_DisableRealmsButton").setSide(Side.CLIENT)
+            .setApplyIf(() -> Common.config.disableRealmsButton).addTargetedMod(TargetedMod.VANILLA)),
+
     OPTIMIZE_WORLD_UPDATE_LIGHT(new Builder("Optimize world updateLightByType method").setPhase(Phase.EARLY)
             .addMixinClasses("minecraft.MixinWorld_FixLightUpdateLag").setSide(Side.BOTH)
             .addExcludedMod(TargetedMod.ARCHAICFIX).addExcludedMod(TargetedMod.ANGELICA)
@@ -164,6 +169,11 @@ public enum Mixins {
     FIX_WORLD_SERVER_LEAKING_UNLOADED_ENTITIES(new Builder("Fix world server leaking unloaded entities")
             .setPhase(Phase.EARLY).setSide(Side.BOTH).addMixinClasses("minecraft.MixinWorldServerUpdateEntities")
             .setApplyIf(() -> Common.config.fixWorldServerLeakingUnloadedEntities).addTargetedMod(TargetedMod.VANILLA)),
+
+    FIX_REDSTONE_TORCH_WORLD_LEAK(new Builder("Fix world leak in redstone torch").setPhase(Phase.EARLY)
+            .setSide(Side.BOTH).addMixinClasses("minecraft.MixinBlockRedstoneTorch")
+            .setApplyIf(() -> Common.config.fixRedstoneTorchWorldLeak).addTargetedMod(TargetedMod.VANILLA)
+            .addExcludedMod(TargetedMod.BUGTORCH)),
     FIX_ARROW_WRONG_LIGHTING(new Builder("Fix arrow wrong lighting").setPhase(Phase.EARLY)
             .addMixinClasses("minecraft.MixinRendererLivingEntity").setSide(Side.CLIENT)
             .setApplyIf(() -> Common.config.fixGlStateBugs).addTargetedMod(TargetedMod.VANILLA)),
@@ -204,7 +214,8 @@ public enum Mixins {
             .addTargetedMod(TargetedMod.FASTCRAFT).addExcludedMod(TargetedMod.OPTIFINE)),
     OPTIMIZE_TEXTURE_LOADING(new Builder("Optimize Texture Loading").setPhase(Phase.EARLY)
             .addMixinClasses("minecraft.textures.client.MixinTextureUtil").addTargetedMod(TargetedMod.VANILLA)
-            .setApplyIf(() -> Common.config.optimizeTextureLoading).setSide(Side.CLIENT)),
+            .addExcludedMod(TargetedMod.ANGELICA).setApplyIf(() -> Common.config.optimizeTextureLoading)
+            .setSide(Side.CLIENT)),
     HIDE_POTION_PARTICLES(new Builder("Hide Potion Particles").setPhase(Phase.EARLY)
             .addMixinClasses("minecraft.MixinEntityLivingBase_HidePotionParticles").setSide(Side.CLIENT)
             .setApplyIf(() -> Common.config.hidePotionParticlesFromSelf).addTargetedMod(TargetedMod.VANILLA)),
@@ -263,8 +274,9 @@ public enum Mixins {
             .addMixinClasses("minecraft.MixinBlockBed").setSide(Side.BOTH)
             .setApplyIf(() -> Common.config.bedMessageAboveHotbar).addTargetedMod(TargetedMod.VANILLA)),
     FIX_PLAYER_SKIN_FETCHING(new Builder("Fix player skin fetching").setPhase(Phase.EARLY)
-            .addMixinClasses("minecraft.MixinAbstractClientPlayer").setSide(Side.CLIENT)
-            .setApplyIf(() -> Common.config.fixPlayerSkinFetching).addTargetedMod(TargetedMod.VANILLA)),
+            .addMixinClasses("minecraft.MixinAbstractClientPlayer", "minecraft.MixinThreadDownloadImageData")
+            .setSide(Side.CLIENT).setApplyIf(() -> Common.config.fixPlayerSkinFetching)
+            .addTargetedMod(TargetedMod.VANILLA)),
     VALIDATE_PACKET_ENCODING_BEFORE_SENDING(new Builder("Validate packet encoding before sending").setPhase(Phase.EARLY)
             .addMixinClasses("minecraft.packets.MixinDataWatcher", "minecraft.packets.MixinS3FPacketCustomPayload")
             .setSide(Side.BOTH).setApplyIf(() -> Common.config.validatePacketEncodingBeforeSending)
@@ -592,7 +604,8 @@ public enum Mixins {
             .setApplyIf(() -> Common.config.pollutionBlockRecolor).setPhase(Phase.EARLY)),
     POLLUTION_RENDER_BLOCKS_OPTIFINE(new Builder("Changes colors of certain blocks based on pollution levels")
             .addMixinClasses("minecraft.MixinRenderBlocks_PollutionWithOptifine").addTargetedMod(TargetedMod.GT5U)
-            .addTargetedMod(TargetedMod.VANILLA).addTargetedMod(TargetedMod.OPTIFINE).setSide(Side.CLIENT)
+            .addTargetedMod(TargetedMod.VANILLA).addTargetedMod(TargetedMod.OPTIFINE)
+            .addExcludedMod(TargetedMod.ANGELICA).setSide(Side.CLIENT)
             .setApplyIf(() -> Common.config.pollutionBlockRecolor).setPhase(Phase.EARLY)),
     POLLUTION_RENDER_BLOCKS_BOP(new Builder("Changes colors of certain blocks based on pollution levels")
             .addMixinClasses("biomesoplenty.MixinFoliageRenderer_Pollution").addTargetedMod(TargetedMod.GT5U)
@@ -670,6 +683,7 @@ public enum Mixins {
     }
 
     public static List<String> getLateMixins(Set<String> loadedMods) {
+        // NOTE: Any targetmod here needs a modid, not a coremod id
         final List<String> mixins = new ArrayList<>();
         final List<String> notLoading = new ArrayList<>();
         for (Mixins mixin : Mixins.values()) {

@@ -19,6 +19,7 @@ public class LoadingConfig {
     public int atropineHighID;
     public int itemStacksPickedUpPerTick;
     public int particleLimit;
+    public boolean removeBOPWarning;
 
     // Mixins
     public boolean addCVSupportToWandPedestal;
@@ -126,6 +127,7 @@ public class LoadingConfig {
     public boolean removeCreativeSearchTab;
     public boolean removeOptifineGLErrors;
 
+    public boolean disableRealmsButton;
     public boolean compactChat;
     public boolean dontInvertCrosshairColor;
     public boolean enhanceNightVision;
@@ -158,6 +160,7 @@ public class LoadingConfig {
     public boolean replaceVoxelMapReflection;
     public boolean fixVoxelMapYCoord;
     public boolean fixVoxelMapChunkNPE;
+    public boolean fixRedstoneTorchWorldLeak;
 
     // render debug
     public boolean renderDebug;
@@ -301,6 +304,7 @@ public class LoadingConfig {
         validatePacketEncodingBeforeSending = config.get(Category.FIXES.toString(), "validatePacketEncodingBeforeSending", true, "Validate vanilla packet encodings before sending in addition to on reception").getBoolean();
         validatePacketEncodingBeforeSendingShouldCrash = config.get(Category.FIXES.toString(), "validatePacketEncodingBeforeSendingShouldCrash", false, "Should the extended packet validation error cause a crash (true) or just print out an error to the log (false)").getBoolean();
 
+        disableRealmsButton = config.get(Category.TWEAKS.toString(), "disableRealmsButton", true, "Disable Minecraft Realms button on main menu").getBoolean();
         compactChat = config.get(Category.TWEAKS.toString(), "Compact chat", true, "Compacts identical consecutive chat messages together").getBoolean();
         dontInvertCrosshairColor = config.get(Category.TWEAKS.toString(), "dontInvertCrosshairColor", false, "Stop inverting colors of crosshair").getBoolean();
         enhanceNightVision = config.get(Category.TWEAKS.toString(), "enhanceNightVision", false, "Remove the blueish sky tint from night vision").getBoolean();
@@ -325,6 +329,7 @@ public class LoadingConfig {
         optimizeTileentityRemoval = config.get(Category.SPEEDUPS.toString(), "optimizeTileentityRemoval", true, "Optimize tileEntity removal in World.class").getBoolean();
         optimizeWorldUpdateLight = config.get(Category.FIXES.toString(), "optimizeWorldUpdateLight", true, "Fix too early light initialization").getBoolean();
         particleLimit = Math.max(Math.min(config.get(Category.TWEAKS.toString(), "particleLimit", 8000, "Particle limit [4000-16000]").getInt(), 16000), 4000);
+        removeBOPWarning = config.get(Category.FIXES.toString(), "removeBOPWarning", false, "Remove the BOP warning on first world generation (ignored when dreamcraft is present)").getBoolean();
         preventPickupLoot = config.get(Category.TWEAKS.toString(), "preventPickupLoot", true, "Prevent monsters from picking up loot.").getBoolean();
         enableMacosCmdShortcuts = config.get(Category.TWEAKS.toString(), "enableMacosCmdShortcuts", true, "Use CMD key on MacOS to COPY / INSERT / SELECT in text fields (Chat, NEI, Server IP etc.)").getBoolean();
         removeSpawningMinecartSound = config.get(Category.TWEAKS.toString(), "removeSpawningMinecartSound", true, "Stop playing a sound when spawning a minecart in the world").getBoolean();
@@ -351,9 +356,11 @@ public class LoadingConfig {
         unbindKeybindsByDefault = config.get(Category.TWEAKS.toString(), "unbindKeybindsByDefault", true, "Unbinds keybinds of certain ARR mods to avoid keybinds conflicts").getBoolean();
         disableAidSpawnByXUSpikes = config.get(Category.TWEAKS.toString(), "disableAidSpawnByXUSpikes", true, "Disables the spawn of zombie aid when zombie is killed by Extra Utilities Spikes, since it can spawn them too far.").getBoolean();
         ic2CellWithContainer = config.get(Category.TWEAKS.toString(), "ic2CellWithContainer", false, "give ic2 cells containers like gregtech cells do").getBoolean();
-        replaceVoxelMapReflection = config.get(Category.SPEEDUPS.toString(), "replaceVoxelMapReflection", true, "Replace reflection in VoxelMap to directly access the fields instead.").getBoolean();
+        replaceVoxelMapReflection = config.get(Category.SPEEDUPS.toString(), "replaceVoxelMapReflection", false, "Replace reflection in VoxelMap to directly access the fields instead.").getBoolean();
         fixVoxelMapYCoord = config.get(Category.FIXES.toString(), "fixVoxelMapYCoord", true, "Fix Y coordinate being off by one").getBoolean();
         fixVoxelMapChunkNPE = config.get(Category.FIXES.toString(), "fixVoxelMapChunkNPE", true, "Fix some NullPointerExceptions").getBoolean();
+        fixRedstoneTorchWorldLeak = config.get(Category.FIXES.toString(), "fixRedstoneTorchWorldLeak", true, "Fix redstone torch leaking world").getBoolean();
+
 
         // Pollution :nauseous:
         pollutionBlockRecolor = config.get(Category.POLLUTION_RECOLOR.toString(), "pollutionRecolor", true, "Changes colors of certain blocks based on pollution levels").getBoolean();
