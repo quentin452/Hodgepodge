@@ -315,6 +315,9 @@ public enum Mixins {
     NETTY_PATCH(new Builder("Fix NPE in Netty's Bootstrap class").addMixinClasses("netty.MixinBootstrap")
             .setPhase(Phase.EARLY).setSide(Side.CLIENT).setApplyIf(() -> Common.config.fixNettyNPE)
             .addTargetedMod(TargetedMod.VANILLA)),
+    MODERN_PICK_BLOCK(new Builder("Allows pick block to pull items from your inventory")
+            .addTargetedMod(TargetedMod.VANILLA).setSide(Side.CLIENT).setPhase(Phase.EARLY)
+            .addMixinClasses("forge.MixinForgeHooks_ModernPickBlock").setApplyIf(() -> Common.config.modernPickBlock)),
 
     // Ic2 adjustments
     IC2_UNPROTECTED_GET_BLOCK_FIX(new Builder("IC2 Kinetic Fix").setPhase(Phase.EARLY).setSide(Side.BOTH)
@@ -647,7 +650,11 @@ public enum Mixins {
                     .addTargetedMod(TargetedMod.GALACTICRAFT_CORE)),
     IC2_CELL(new Builder("No IC2 Cell Consumption in tanks").addMixinClasses("ic2.MixinIC2ItemCell")
             .setPhase(Phase.LATE).setSide(Side.BOTH).setApplyIf(() -> Common.config.ic2CellWithContainer)
-            .addTargetedMod(TargetedMod.IC2));
+            .addTargetedMod(TargetedMod.IC2)),
+    TD_NASE_PREVENTION(new Builder("Prevent NegativeArraySizeException on itemduct transfers")
+            .addMixinClasses("thermaldynamics.MixinSimulatedInv").setSide(Side.BOTH)
+            .setApplyIf(() -> Common.config.preventThermalDynamicsNASE).addTargetedMod(TargetedMod.THERMALDYNAMICS)
+            .setPhase(Phase.LATE));
 
     private final List<String> mixinClasses;
     private final List<TargetedMod> targetedMods;
