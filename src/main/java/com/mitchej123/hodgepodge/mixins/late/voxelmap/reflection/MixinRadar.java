@@ -1,14 +1,6 @@
 package com.mitchej123.hodgepodge.mixins.late.voxelmap.reflection;
 
-import net.minecraft.client.model.ModelBat;
-import net.minecraft.client.model.ModelBlaze;
-import net.minecraft.client.model.ModelDragon;
-import net.minecraft.client.model.ModelGhast;
-import net.minecraft.client.model.ModelHorse;
-import net.minecraft.client.model.ModelOcelot;
-import net.minecraft.client.model.ModelSilverfish;
-import net.minecraft.client.model.ModelSlime;
-import net.minecraft.client.model.ModelSquid;
+import net.minecraft.client.model.*;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

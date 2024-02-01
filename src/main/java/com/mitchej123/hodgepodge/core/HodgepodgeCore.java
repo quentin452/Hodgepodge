@@ -8,14 +8,7 @@ import com.gtnewhorizon.gtnhlib.config.ConfigException;
 import com.gtnewhorizon.gtnhlib.config.ConfigurationManager;
 import com.gtnewhorizon.gtnhmixins.IEarlyMixinLoader;
 import com.mitchej123.hodgepodge.asm.AsmTransformers;
-import com.mitchej123.hodgepodge.config.ASMConfig;
-import com.mitchej123.hodgepodge.config.DebugConfig;
-import com.mitchej123.hodgepodge.config.FixesConfig;
-import com.mitchej123.hodgepodge.config.OverallConfig;
-import com.mitchej123.hodgepodge.config.PollutionConfig;
-import com.mitchej123.hodgepodge.config.PollutionRecolorConfig;
-import com.mitchej123.hodgepodge.config.SpeedupsConfig;
-import com.mitchej123.hodgepodge.config.TweaksConfig;
+import com.mitchej123.hodgepodge.config.*;
 import com.mitchej123.hodgepodge.mixins.Mixins;
 
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;

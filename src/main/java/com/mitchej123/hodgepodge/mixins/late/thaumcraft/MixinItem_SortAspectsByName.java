@@ -11,11 +11,7 @@ import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.wands.ItemFocusBasic;
 import thaumcraft.common.blocks.ItemJarFilled;
 import thaumcraft.common.blocks.ItemJarNode;
-import thaumcraft.common.items.ItemCrystalEssence;
-import thaumcraft.common.items.ItemEssence;
-import thaumcraft.common.items.ItemManaBean;
-import thaumcraft.common.items.ItemResource;
-import thaumcraft.common.items.ItemWispEssence;
+import thaumcraft.common.items.*;
 import thaumcraft.common.items.armor.ItemHoverHarness;
 
 @Mixin({ ItemFocusBasic.class, ItemJarFilled.class, ItemJarNode.class, ItemCrystalEssence.class, ItemEssence.class,
