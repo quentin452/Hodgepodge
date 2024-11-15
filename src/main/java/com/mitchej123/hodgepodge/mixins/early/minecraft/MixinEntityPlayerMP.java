@@ -19,6 +19,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.google.common.collect.Sets;
+import com.mitchej123.hodgepodge.HodgepodgeEventHandler;
 
 @Mixin(EntityPlayerMP.class)
 public abstract class MixinEntityPlayerMP extends EntityLivingBase {
@@ -35,20 +36,19 @@ public abstract class MixinEntityPlayerMP extends EntityLivingBase {
             ServersideAttributeMap oldAttributeMap = (ServersideAttributeMap) oldPlayer.getAttributeMap();
 
             // Grab the watched attributes
-            @SuppressWarnings("unchecked")
             Collection<IAttributeInstance> watchedAttribs = oldAttributeMap.getWatchedAttributes();
 
             if (!watchedAttribs.isEmpty()) {
                 ServersideAttributeMap newAttributeMap = (ServersideAttributeMap) (this.getAttributeMap());
 
                 for (IAttributeInstance oldAttr : watchedAttribs) {
-                    if (!(oldAttr instanceof ModifiableAttributeInstance)) continue;
+                    if (!(oldAttr instanceof ModifiableAttributeInstance oldAttrModifiable)) continue;
 
                     // Get a new instance of a modifiable attribute based on the old one
                     ModifiableAttributeInstance newInst = newAttributeMap.getAttributeInstance(oldAttr.getAttribute());
 
                     // Get the modifiers for the old attribute
-                    for (AttributeModifier modifier : getModifiers((ModifiableAttributeInstance) oldAttr)) try {
+                    for (AttributeModifier modifier : getModifiers(oldAttrModifiable)) try {
                         // And apply them to the new attribute instance
                         newInst.applyModifier(modifier);
                     } catch (IllegalArgumentException ignored) {
@@ -63,7 +63,6 @@ public abstract class MixinEntityPlayerMP extends EntityLivingBase {
     }
 
     // Helper method based on 1.12
-    @SuppressWarnings("unchecked")
     @Unique
     private Collection<AttributeModifier> getModifiers(ModifiableAttributeInstance attr) {
         Set<AttributeModifier> toReturn = Sets.newHashSet();
@@ -71,6 +70,11 @@ public abstract class MixinEntityPlayerMP extends EntityLivingBase {
             toReturn.addAll(attr.getModifiersByOperation(i));
         }
         return toReturn;
+    }
+
+    @Inject(method = "closeContainer", at = @At("HEAD"))
+    private void hodgepodge$detectClosingContainer(CallbackInfo ci) {
+        HodgepodgeEventHandler.playersClosedContainers.add((EntityPlayerMP) (Object) this);
     }
 
     private MixinEntityPlayerMP(World p_i1594_1_) {

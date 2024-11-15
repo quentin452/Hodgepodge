@@ -37,9 +37,8 @@ public class ChatHandler {
         if (!(prevMsg.getSiblings().get(size2 - 1) instanceof ChatComponentCount)) {
             return false;
         }
-        final Object removed = prevMsg.getSiblings().remove(size2 - 1);
+        final IChatComponent removed = prevMsg.getSiblings().remove(size2 - 1);
         final boolean equals = imsg.equals(prevMsg);
-        // noinspection unchecked
         prevMsg.getSiblings().add(removed);
         if (equals) {
             previousCount = ((ChatComponentCount) removed).getCount();

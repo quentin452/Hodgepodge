@@ -7,6 +7,7 @@ import net.minecraftforge.common.MinecraftForge;
 import com.mitchej123.hodgepodge.Common;
 import com.mitchej123.hodgepodge.Compat;
 import com.mitchej123.hodgepodge.client.handlers.ClientKeyListener;
+import com.mitchej123.hodgepodge.client.handlers.ReloadSoundsGui;
 import com.mitchej123.hodgepodge.config.DebugConfig;
 import com.mitchej123.hodgepodge.config.FixesConfig;
 import com.mitchej123.hodgepodge.config.TweaksConfig;
@@ -21,12 +22,6 @@ public class HodgepodgeClient {
 
     public static final ManagedEnum<AnimationMode> animationsMode = new ManagedEnum<>(AnimationMode.VISIBLE_ONLY);
     public static final ManagedEnum<RenderDebugMode> renderDebugMode = new ManagedEnum<>(RenderDebugMode.REDUCED);
-
-    public static void preInit() {
-        if (Compat.isGT5Present()) {
-            MinecraftForge.EVENT_BUS.register(PollutionTooltip.INSTANCE);
-        }
-    }
 
     public static void postInit() {
 
@@ -46,24 +41,15 @@ public class HodgepodgeClient {
             }
         }
 
-        if (Compat.isGT5Present()) {
-            Common.config.postInitClient();
-            MinecraftForge.EVENT_BUS.register(Common.config.standardBlocks);
-            MinecraftForge.EVENT_BUS.register(Common.config.liquidBlocks);
-            MinecraftForge.EVENT_BUS.register(Common.config.doublePlants);
-            MinecraftForge.EVENT_BUS.register(Common.config.crossedSquares);
-            MinecraftForge.EVENT_BUS.register(Common.config.blockVine);
-        }
-
         FMLCommonHandler.instance().bus().register(ClientTicker.INSTANCE);
+
+        MinecraftForge.EVENT_BUS.register(new ReloadSoundsGui());
 
         if (TweaksConfig.addSystemInfo) {
             MinecraftForge.EVENT_BUS.register(DebugScreenHandler.INSTANCE);
         }
 
-        if (FixesConfig.speedupAnimations) {
-            FMLCommonHandler.instance().bus().register(new ClientKeyListener());
-        }
+        FMLCommonHandler.instance().bus().register(new ClientKeyListener());
 
         if (Compat.isIC2CropPluginPresent()) {
             ModMetadata meta = Loader.instance().getIndexedModList().get("Ic2Nei").getMetadata();

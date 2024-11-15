@@ -11,8 +11,6 @@ import com.mitchej123.hodgepodge.Common;
 import com.mitchej123.hodgepodge.config.ASMConfig;
 import com.mitchej123.hodgepodge.config.DebugConfig;
 import com.mitchej123.hodgepodge.config.FixesConfig;
-import com.mitchej123.hodgepodge.config.PollutionConfig;
-import com.mitchej123.hodgepodge.config.PollutionRecolorConfig;
 import com.mitchej123.hodgepodge.config.SpeedupsConfig;
 import com.mitchej123.hodgepodge.config.TweaksConfig;
 
@@ -21,9 +19,10 @@ import cpw.mods.fml.relauncher.FMLLaunchHandler;
 public enum Mixins {
 
     // Vanilla Fixes
-    CHANGE_CATEGORY_SPRINT_KEY(new Builder("Moves the sprint keybind to the movement category")
-            .addTargetedMod(TargetedMod.VANILLA).setSide(Side.CLIENT).setPhase(Phase.EARLY)
-            .addMixinClasses("minecraft.MixinGameSetttings").setApplyIf(() -> TweaksConfig.changeSprintCategory)),
+    CHANGE_CATEGORY_SPRINT_KEY(
+            new Builder("Moves the sprint keybind to the movement category").addTargetedMod(TargetedMod.VANILLA)
+                    .setSide(Side.CLIENT).setPhase(Phase.EARLY).addMixinClasses("minecraft.MixinGameSettings_SprintKey")
+                    .setApplyIf(() -> TweaksConfig.changeSprintCategory)),
     FIX_TOO_MANY_ALLOCATIONS_CHUNK_POSITION_INT_PAIR(
             new Builder("Stops MC from allocating too many ChunkPositionIntPair objects")
                     .addTargetedMod(TargetedMod.VANILLA).setSide(Side.BOTH).setPhase(Phase.EARLY)
@@ -81,6 +80,10 @@ public enum Mixins {
     FIX_FRIENDLY_CREATURE_SOUNDS(new Builder("Fix Friendly Creature Sounds").setPhase(Phase.EARLY)
             .addMixinClasses("minecraft.MixinSoundHandler").setSide(Side.CLIENT).addTargetedMod(TargetedMod.VANILLA)
             .setApplyIf(() -> FixesConfig.fixFriendlyCreatureSounds)),
+    LOGARITHMIC_VOLUME_CONTROL(new Builder("Logarithmic Volume Control").setPhase(Phase.EARLY)
+            .addMixinClasses("minecraft.MixinSoundManager", "minecraft.MixinSoundManagerLibraryLoader")
+            .setSide(Side.CLIENT).addTargetedMod(TargetedMod.VANILLA)
+            .setApplyIf(() -> FixesConfig.logarithmicVolumeControl)),
     THROTTLE_ITEMPICKUPEVENT(new Builder("Throttle Item Pickup Event").setPhase(Phase.EARLY)
             .addMixinClasses("minecraft.MixinEntityPlayer").setSide(Side.BOTH)
             .setApplyIf(() -> FixesConfig.throttleItemPickupEvent).addTargetedMod(TargetedMod.VANILLA)),
@@ -119,6 +122,10 @@ public enum Mixins {
     SPEEDUP_GRASS_BLOCK_RANDOM_TICKING(new Builder("Speed up grass block random ticking").setPhase(Phase.EARLY)
             .addMixinClasses("minecraft.MixinBlockGrass").addTargetedMod(TargetedMod.VANILLA).setSide(Side.BOTH)
             .setApplyIf(() -> SpeedupsConfig.speedupGrassBlockRandomTicking)),
+    SPEEDUP_CHUNK_PROVIDER_CLIENT(new Builder("Speed up ChunkProviderClient").setPhase(Phase.EARLY).setSide(Side.CLIENT)
+            .addMixinClasses("minecraft.MixinChunkProviderClient_RemoveChunkListing")
+            .addTargetedMod(TargetedMod.VANILLA).addExcludedMod(TargetedMod.FASTCRAFT)
+            .setApplyIf(() -> SpeedupsConfig.speedupChunkProviderClient && ASMConfig.speedupLongIntHashMap)),
     CHUNK_COORDINATES_HASHCODE(new Builder("Optimize Chunk Coordinates Hashcode").setPhase(Phase.EARLY)
             .setSide(Side.BOTH).addMixinClasses("minecraft.MixinChunkCoordinates").addTargetedMod(TargetedMod.VANILLA)
             .setApplyIf(() -> SpeedupsConfig.speedupChunkCoordinatesHashCode)),
@@ -140,6 +147,9 @@ public enum Mixins {
     FORGE_UPDATE_CHECK_FIX(new Builder("Fix the forge update checker").setPhase(Phase.EARLY).setSide(Side.BOTH)
             .addMixinClasses("forge.MixinForgeVersion_FixUpdateCheck")
             .setApplyIf(() -> FixesConfig.fixForgeUpdateChecker).addTargetedMod(TargetedMod.VANILLA)),
+    FORGE_FIX_CLASS_TYPO(new Builder("Fix a class name typo in MinecraftForge's initialize method")
+            .setPhase(Phase.EARLY).setSide(Side.BOTH).addMixinClasses("forge.MixinMinecraftForge")
+            .setApplyIf(() -> FixesConfig.fixEffectRendererClassTypo).addTargetedMod(TargetedMod.VANILLA)),
     NORTHWEST_BIAS_FIX(new Builder("Fix Northwest Bias").setPhase(Phase.EARLY).setSide(Side.BOTH)
             .addMixinClasses("minecraft.MixinRandomPositionGenerator").setApplyIf(() -> FixesConfig.fixNorthWestBias)
             .addTargetedMod(TargetedMod.VANILLA)),
@@ -185,6 +195,19 @@ public enum Mixins {
     FIX_HUGE_CHAT_KICK(new Builder("Fix huge chat kick").setPhase(Phase.EARLY).setSide(Side.BOTH)
             .addMixinClasses("minecraft.MixinS02PacketChat").setApplyIf(() -> FixesConfig.fixHugeChatKick)
             .addTargetedMod(TargetedMod.VANILLA)),
+    FIX_BOGUS_INTEGRATED_SERVER_NPE(new Builder("Fix bogus FMLProxyPacket NPEs on integrated server crashes")
+            .setPhase(Phase.EARLY).setSide(Side.BOTH)
+            .addMixinClasses(
+                    "fml.MixinFMLProxyPacket",
+                    "fml.MixinNetworkDispatcher",
+                    "minecraft.NetworkManagerAccessor")
+            .setApplyIf(() -> FixesConfig.fixBogusIntegratedServerNPEs).addTargetedMod(TargetedMod.VANILLA)),
+
+    FIX_LOGIN_DIMENSION_ID_OVERFLOW(
+            new Builder("Fix dimension id overflowing when a player first logins on a server").setPhase(Phase.EARLY)
+                    .setSide(Side.BOTH).addMixinClasses("minecraft.packets.MixinS01PacketJoinGame_FixDimensionID")
+                    .setApplyIf(() -> FixesConfig.fixLoginDimensionIDOverflow).addTargetedMod(TargetedMod.VANILLA)),
+
     FIX_WORLD_SERVER_LEAKING_UNLOADED_ENTITIES(new Builder("Fix world server leaking unloaded entities")
             .setPhase(Phase.EARLY).setSide(Side.BOTH).addMixinClasses("minecraft.MixinWorldServerUpdateEntities")
             .setApplyIf(() -> FixesConfig.fixWorldServerLeakingUnloadedEntities).addTargetedMod(TargetedMod.VANILLA)),
@@ -211,7 +234,7 @@ public enum Mixins {
     FIX_OPTIFINE_CHUNKLOADING_CRASH(new Builder("Fix Optifine Chunkloading Crash").setPhase(Phase.EARLY)
             .setApplyIf(() -> FixesConfig.fixOptifineChunkLoadingCrash).setSide(Side.CLIENT)
             .addTargetedMod(TargetedMod.VANILLA).addTargetedMod(TargetedMod.OPTIFINE)
-            .addMixinClasses("minecraft.MixinGameSettings")),
+            .addMixinClasses("minecraft.MixinGameSettings_FixOFChunkLoading")),
     ADD_TOGGLE_DEBUG_MESSAGE(new Builder("Toggle Debug Message").setPhase(Phase.EARLY)
             .addMixinClasses("minecraft.MixinMinecraft_ToggleDebugMessage").setSide(Side.CLIENT)
             .setApplyIf(() -> TweaksConfig.addToggleDebugMessage).addTargetedMod(TargetedMod.VANILLA)),
@@ -252,8 +275,11 @@ public enum Mixins {
             .setPhase(Phase.EARLY).addTargetedMod(TargetedMod.VANILLA).setApplyIf(() -> TweaksConfig.enhanceNightVision)
             .addMixinClasses("minecraft.MixinEntityRenderer_EnhanceNightVision")),
     OPTIMIZE_ASMDATATABLE_INDEX(new Builder("Optimize ASM DataTable Index").setPhase(Phase.EARLY).setSide(Side.BOTH)
-            .addMixinClasses("forge.MixinASMDataTable").setApplyIf(() -> SpeedupsConfig.optimizeASMDataTable)
+            .addMixinClasses("fml.MixinASMDataTable").setApplyIf(() -> SpeedupsConfig.optimizeASMDataTable)
             .addTargetedMod(TargetedMod.VANILLA)),
+    SQUASH_BED_ERROR_MESSAGE(new Builder("Stop \"You can only sleep at night\" message filling the chat")
+            .addMixinClasses("minecraft.MixinNetHandlerPlayClient").addTargetedMod(TargetedMod.VANILLA)
+            .setApplyIf(() -> FixesConfig.squashBedErrorMessage).setPhase(Phase.EARLY).setSide(Side.CLIENT)),
     CHUNK_SAVE_CME_DEBUG(new Builder("Add debugging code to Chunk Save CME").setPhase(Phase.EARLY).setSide(Side.BOTH)
             .addMixinClasses("minecraft.MixinNBTTagCompound").setApplyIf(() -> DebugConfig.chunkSaveCMEDebug)
             .addTargetedMod(TargetedMod.VANILLA)),
@@ -269,7 +295,7 @@ public enum Mixins {
             .addMixinClasses("forge.MixinGuiIngameForge_CrosshairInvertColors").setSide(Side.CLIENT)
             .setApplyIf(() -> TweaksConfig.dontInvertCrosshairColor).addTargetedMod(TargetedMod.VANILLA)),
     FIX_OPENGUIHANDLER_WINDOWID(new Builder("Fix OpenGuiHandler").setPhase(Phase.EARLY).setSide(Side.BOTH)
-            .addMixinClasses("forge.MixinOpenGuiHandler").setApplyIf(() -> FixesConfig.fixForgeOpenGuiHandlerWindowId)
+            .addMixinClasses("fml.MixinOpenGuiHandler").setApplyIf(() -> FixesConfig.fixForgeOpenGuiHandlerWindowId)
             .addTargetedMod(TargetedMod.VANILLA)),
     FIX_KEYBIND_CONFLICTS(new Builder("Trigger all conflicting keybinds").setPhase(Phase.EARLY).setSide(Side.CLIENT)
             .addMixinClasses("minecraft.MixinKeyBinding", "minecraft.MixinMinecraft_UpdateKeys")
@@ -324,9 +350,8 @@ public enum Mixins {
             .addMixinClasses("minecraft.MixinGuiContainerCreative").setSide(Side.CLIENT)
             .setApplyIf(() -> FixesConfig.removeCreativeSearchTab).addTargetedMod(TargetedMod.NOTENOUGHITEMS)),
     FIX_CHAT_COLOR_WRAPPING(new Builder("Fix wrapped chat lines missing colors").setPhase(Phase.EARLY)
-            .addMixinClasses("minecraft.MixinGuiNewChat_FixColorWrapping", "minecraft.FontRendererAccessor")
-            .setSide(Side.CLIENT).setApplyIf(() -> FixesConfig.fixChatWrappedColors)
-            .addTargetedMod(TargetedMod.VANILLA)),
+            .addMixinClasses("minecraft.MixinGuiNewChat_FixColorWrapping").setSide(Side.CLIENT)
+            .setApplyIf(() -> FixesConfig.fixChatWrappedColors).addTargetedMod(TargetedMod.VANILLA)),
     COMPACT_CHAT(new Builder("Compact chat").setPhase(Phase.EARLY)
             .addMixinClasses("minecraft.MixinGuiNewChat_CompactChat").setSide(Side.CLIENT)
             .setApplyIf(() -> TweaksConfig.compactChat).addTargetedMod(TargetedMod.VANILLA)),
@@ -336,6 +361,112 @@ public enum Mixins {
     MODERN_PICK_BLOCK(new Builder("Allows pick block to pull items from your inventory")
             .addTargetedMod(TargetedMod.VANILLA).setSide(Side.CLIENT).setPhase(Phase.EARLY)
             .addMixinClasses("forge.MixinForgeHooks_ModernPickBlock").setApplyIf(() -> TweaksConfig.modernPickBlock)),
+    TESSELATOR_PRESERVE_QUAD_ORDER(new Builder("Preserve the rendering order of layered quads on terrain pass 1")
+            .addTargetedMod(TargetedMod.VANILLA).setSide(Side.CLIENT).setPhase(Phase.EARLY)
+            .addMixinClasses("minecraft.MixinTessellator").setApplyIf(() -> FixesConfig.fixPreserveQuadOrder)),
+    FAST_BLOCK_PLACING(new Builder("Allows blocks to be placed faster").addTargetedMod(TargetedMod.VANILLA)
+            .setSide(Side.CLIENT).setPhase(Phase.EARLY).addMixinClasses("minecraft.MixinMinecraft_FastBlockPlacing")
+            .setApplyIf(() -> true)), // Always apply, config handled in mixin
+    FIX_NEGATIVE_KELVIN(new Builder("Fix the local temperature can go below absolute zero")
+            .addTargetedMod(TargetedMod.VANILLA).setSide(Side.BOTH).setPhase(Phase.EARLY)
+            .addMixinClasses("minecraft.MixinBiomeGenBase").setApplyIf(() -> FixesConfig.fixNegativeKelvin)),
+
+    SPIGOT_EXTENDED_CHUNKS(new Builder("Spigot-style extended chunk format to remove the 2MB chunk size limit")
+            .addTargetedMod(TargetedMod.VANILLA).addExcludedMod(TargetedMod.BUKKIT).setSide(Side.BOTH)
+            .setPhase(Phase.EARLY).addMixinClasses("minecraft.MixinRegionFile")
+            .setApplyIf(() -> FixesConfig.remove2MBChunkLimit)),
+
+    AUTOSAVE_INTERVAL(new Builder("Sets the auto save interval in ticks").setPhase(Phase.EARLY).setSide(Side.BOTH)
+            .addTargetedMod(TargetedMod.VANILLA)
+            .addMixinClasses("minecraft.server.MixinMinecraftServer_AutoSaveInterval")
+            .setApplyIf(() -> TweaksConfig.autoSaveInterval != 900)),
+
+    LIGHTER_WATER(new Builder("Decreases water opacity from 3 to 1, like in modern").setPhase(Phase.EARLY)
+            .setSide(Side.BOTH).addTargetedMod(TargetedMod.VANILLA).addMixinClasses("minecraft.MixinBlock_LighterWater")
+            .setApplyIf(() -> TweaksConfig.useLighterWater)),
+
+    EARLY_CHUNK_TILE_COORDINATE_CHECK(
+            new Builder("Checks saved TileEntity coordinates earlier to provide a more descriptive error message")
+                    .setPhase(Phase.EARLY).setSide(Side.BOTH).addTargetedMod(TargetedMod.VANILLA)
+                    .addMixinClasses("minecraft.MixinChunk")
+                    .setApplyIf(() -> FixesConfig.earlyChunkTileCoordinateCheck)),
+
+    FIX_DUPLICATE_SOUNDS(new Builder("Fix duplicate sounds being played when you close a gui while one is playing")
+            .setPhase(Phase.EARLY).setSide(Side.CLIENT).addTargetedMod(TargetedMod.VANILLA)
+            .addMixinClasses("minecraft.MixinMinecraft_FixDuplicateSounds")
+            .setApplyIf(() -> FixesConfig.fixDuplicateSounds)),
+
+    ADD_MOD_ITEM_STATS(new Builder("Add stats for modded items").addMixinClasses("fml.MixinGameRegistry")
+            .addTargetedMod(TargetedMod.VANILLA).setApplyIf(() -> TweaksConfig.addModItemStats).setPhase(Phase.EARLY)
+            .setSide(Side.BOTH)),
+
+    ADD_MOD_ENTITY_STATS(new Builder("Add stats for modded entities").addMixinClasses("minecraft.MixinStatList")
+            .addTargetedMod(TargetedMod.VANILLA).setApplyIf(() -> TweaksConfig.addModEntityStats).setPhase(Phase.EARLY)
+            .setSide(Side.BOTH)),
+
+    ADD_MOD_ENTITY_STATS_CLIENT(new Builder("Add stats for modded entities (client side)")
+            .addMixinClasses("minecraft.MixinStatsMobsList", "minecraft.MixinStatsBlock", "minecraft.MixinStatsItem")
+            .addTargetedMod(TargetedMod.VANILLA).setApplyIf(() -> TweaksConfig.addModEntityStats).setPhase(Phase.EARLY)
+            .setSide(Side.CLIENT)),
+
+    FIX_SLASH_COMMAND(
+            new Builder("Fix forge command handler not checking for a / and also not running commands with any case")
+                    .setPhase(Phase.EARLY).setSide(Side.CLIENT).addTargetedMod(TargetedMod.VANILLA)
+                    .addMixinClasses("minecraft.MixinClientCommandHandler_CommandFix")
+                    .setApplyIf(() -> FixesConfig.fixSlashCommands)),
+
+    FIX_CASE_COMMAND(new Builder("Fix the command handler not allowing you to run commands typed in any case")
+            .setPhase(Phase.EARLY).setSide(Side.BOTH).addTargetedMod(TargetedMod.VANILLA)
+            .addMixinClasses("minecraft.MixinCommandHandler_CommandFix").setApplyIf(() -> FixesConfig.fixCaseCommands)),
+    FIX_GAMESETTINGS_OUTOFBOUNDS(new Builder("Fix array out of bound error in GameSettings menu").setPhase(Phase.EARLY)
+            .setSide(Side.CLIENT).addTargetedMod(TargetedMod.VANILLA)
+            .addMixinClasses("minecraft.MixinGameSettings_FixArrayOutOfBounds")
+            .setApplyIf(() -> FixesConfig.fixGameSettingsArrayOutOfBounds).addExcludedMod(TargetedMod.LWJGL3IFY)),
+
+    LIMIT_RECURSIVE_BLOCK_UPDATE_DEPTH(new Builder(
+            "Limit the number of recursive cascading block updates during world generation to prevent stack overflow crashes")
+                    .setPhase(Phase.EARLY).setSide(Side.BOTH).addTargetedMod(TargetedMod.VANILLA)
+                    .addMixinClasses("minecraft.MixinWorldServer_LimitUpdateRecursion")
+                    .setApplyIf(() -> FixesConfig.limitRecursiveBlockUpdateDepth >= 0)),
+
+    ADD_MOD_CONFIG_SEARCHBAR(new Builder("Adds a search bar to the mod config GUI").setPhase(Phase.EARLY)
+            .setSide(Side.CLIENT).addMixinClasses("fml.MixinGuiConfig")
+            .setApplyIf(() -> TweaksConfig.addModConfigSearchBar).addTargetedMod(TargetedMod.VANILLA)),
+
+    FIX_BUTTON_POS_GUIOPENLINK(new Builder("Fix the buttons not being centered in the GuiConfirmOpenLink")
+            .setPhase(Phase.EARLY).setSide(Side.CLIENT).addTargetedMod(TargetedMod.VANILLA)
+            .addMixinClasses("minecraft.MixinGuiConfirmOpenLink")
+            .setApplyIf(() -> FixesConfig.fixButtonsGuiConfirmOpenLink)),
+
+    FIX_CHAT_OPEN_LINK(new Builder("Fix the vanilla method to open chat links not working for every OS")
+            .setPhase(Phase.EARLY).setSide(Side.CLIENT).addTargetedMod(TargetedMod.VANILLA)
+            .addMixinClasses("minecraft.MixinGuiChat_OpenLinks").setApplyIf(() -> FixesConfig.fixChatOpenLink)),
+
+    FIX_NAMETAG_BRIGHTNESS(new Builder("Fix nametag brightness").setPhase(Phase.EARLY).setSide(Side.CLIENT)
+            .addMixinClasses("minecraft.MixinRendererLivingEntity_NametagBrightness")
+            .setApplyIf(() -> FixesConfig.fixNametagBrightness).addTargetedMod(TargetedMod.VANILLA)),
+
+    FIX_HIT_EFFECT_BRIGHTNESS(new Builder("Fix hit effect brightness").setPhase(Phase.EARLY).setSide(Side.CLIENT)
+            .addMixinClasses("minecraft.MixinRendererLivingEntity_HitEffectBrightness")
+            .setApplyIf(() -> FixesConfig.fixHitEffectBrightness).addTargetedMod(TargetedMod.VANILLA)),
+
+    MEMORY_FIXES_CLIENT(
+            new Builder("Memory fixes").setPhase(Phase.EARLY).setSide(Side.CLIENT).addTargetedMod(TargetedMod.VANILLA)
+                    .addMixinClasses("memory.MixinFMLClientHandler").setApplyIf(() -> FixesConfig.enableMemoryFixes)),
+
+    FAST_INT_CACHE(new Builder("Rewrite internal caching methods to be safer and faster").setPhase(Phase.EARLY)
+            .setSide(Side.BOTH).addTargetedMod(TargetedMod.VANILLA)
+            .addMixinClasses("minecraft.fastload.MixinIntCache", "minecraft.fastload.MixinWorldChunkManager")
+            .setApplyIf(() -> SpeedupsConfig.fastIntCache)),
+
+    FAST_CHUNK_LOADING(new Builder("Invasively accelerates chunk handling").setPhase(Phase.EARLY).setSide(Side.BOTH)
+            .addTargetedMod(TargetedMod.VANILLA)
+            .addMixinClasses("minecraft.fastload.MixinEntityPlayerMP", "minecraft.fastload.MixinChunkProviderServer")
+            .setApplyIf(() -> SpeedupsConfig.fastChunkHandling)),
+
+    MEMORY_FIXES_IC2(new Builder("Removes allocation spam from the Direction.applyTo method").setPhase(Phase.LATE)
+            .setSide(Side.BOTH).addMixinClasses("ic2.MixinDirection_Memory")
+            .setApplyIf(() -> FixesConfig.enableMemoryFixes).addTargetedMod(TargetedMod.IC2)),
 
     // Ic2 adjustments
     IC2_UNPROTECTED_GET_BLOCK_FIX(new Builder("IC2 Kinetic Fix").setPhase(Phase.EARLY).setSide(Side.BOTH)
@@ -359,9 +490,6 @@ public enum Mixins {
     HIDE_IC2_REACTOR_COOLANT_SLOTS(new Builder("IC2 Reactory Fix").setPhase(Phase.EARLY).setSide(Side.BOTH)
             .addMixinClasses("ic2.MixinTileEntityNuclearReactorElectric")
             .setApplyIf(() -> TweaksConfig.hideIc2ReactorSlots).addTargetedMod(TargetedMod.IC2)),
-    IC2_HAZMAT(new Builder("Hazmat").setPhase(Phase.LATE).setSide(Side.BOTH).addMixinClasses("ic2.MixinIc2Hazmat")
-            .setApplyIf(() -> FixesConfig.fixIc2Hazmat).addTargetedMod(TargetedMod.IC2).addTargetedMod(TargetedMod.GT5U)
-            .addExcludedMod(TargetedMod.GT6)),
     IC2_FLUID_CONTAINER_TOOLTIP(new Builder("IC2 Fluid Container Tooltip Fix").setPhase(Phase.EARLY).setSide(Side.BOTH)
             .addMixinClasses("ic2.MixinItemIC2FluidContainer")
             .setApplyIf(() -> TweaksConfig.displayIc2FluidLocalizedName).addTargetedMod(TargetedMod.IC2)),
@@ -382,6 +510,13 @@ public enum Mixins {
                     "ic2.MixinIC2ArmorSolarHelmet",
                     "ic2.MixinIC2ArmorStaticBoots")
             .setApplyIf(() -> FixesConfig.fixIc2ArmorLag).addTargetedMod(TargetedMod.IC2)),
+    IC2_RESOURCE_PACK_TRANSLATION_FIX(
+            new Builder("IC2 Resource Pack Translation Fix").setPhase(Phase.EARLY).setSide(Side.CLIENT)
+                    .addMixinClasses("fml.MixinLanguageRegistry", "fml.MixinFMLClientHandler", "ic2.MixinLocalization")
+                    .setApplyIf(() -> FixesConfig.fixIc2ResourcePackTranslation).addTargetedMod(TargetedMod.IC2)),
+    IC2_CROP_TRAMPLING_FIX(new Builder("IC2 Crop Trampling Fix").setPhase(Phase.LATE).setSide(Side.BOTH)
+            .addMixinClasses("ic2.MixinIC2TileEntityCrop").setApplyIf(() -> FixesConfig.fixIc2CropTrampling)
+            .addTargetedMod(TargetedMod.IC2)),
 
     // Disable update checkers
     BIBLIOCRAFT_UPDATE_CHECK(new Builder("Yeet Bibliocraft Update Check").setPhase(Phase.LATE).setSide(Side.CLIENT)
@@ -390,9 +525,9 @@ public enum Mixins {
     COFH_CORE_UPDATE_CHECK(new Builder("Yeet COFH Core Update Check").setPhase(Phase.EARLY).setSide(Side.BOTH)
             .addMixinClasses("cofhcore.MixinCoFHCoreUpdateCheck").setApplyIf(() -> FixesConfig.removeUpdateChecks)
             .addTargetedMod(TargetedMod.COFH_CORE)),
-    JOURNEYMAP_UPDATE_CHECK(new Builder("Yeet Journeymap Update Check").setPhase(Phase.LATE).setSide(Side.CLIENT)
-            .addMixinClasses("journeymap.MixinVersionCheck").setApplyIf(() -> FixesConfig.removeUpdateChecks)
-            .addTargetedMod(TargetedMod.JOURNEYMAP)),
+    DAMAGE_INDICATORS_UPDATE_CHECK(new Builder("Yeet Damage Indicators Update Check").setPhase(Phase.LATE)
+            .setSide(Side.CLIENT).addMixinClasses("damageindicators.MixinDIClientProxy")
+            .setApplyIf(() -> FixesConfig.removeUpdateChecks).addTargetedMod(TargetedMod.DAMAGE_INDICATORS)),
 
     // Railcraft Anchors
     WAKE_ANCHORS_ON_LOGIN_PASSIVE(new Builder("Wake passive anchors on login").setPhase(Phase.LATE).setSide(Side.BOTH)
@@ -431,6 +566,25 @@ public enum Mixins {
             .addMixinClasses("thaumcraft.MixinEntityGolemBase", "thaumcraft.MixinItemGolemBell")
             .setApplyIf(() -> FixesConfig.fixThaumcraftGolemMarkerLoading).addTargetedMod(TargetedMod.THAUMCRAFT)),
 
+    FIX_WORLD_COORDINATE_HASHING_METHOD(new Builder("Implement a proper hashing method for WorldCoordinates")
+            .addMixinClasses("thaumcraft.MixinWorldCoordinates").setPhase(Phase.LATE).setSide(Side.BOTH)
+            .setApplyIf(() -> FixesConfig.fixThaumcraftWorldCoordinatesHashingMethod)
+            .addTargetedMod(TargetedMod.THAUMCRAFT)),
+
+    FIX_MAGICAL_LEAVES_LAG(new Builder("Fix Thaumcraft leaves frequent ticking")
+            .addMixinClasses("thaumcraft.MixinBlockMagicalLeaves", "thaumcraft.MixinBlockMagicalLog")
+            .setPhase(Phase.LATE).setSide(Side.BOTH).setApplyIf(() -> FixesConfig.fixThaumcraftLeavesLag)
+            .addTargetedMod(TargetedMod.THAUMCRAFT)),
+    FIX_THAUMCRAFT_VIS_DUPLICATION(new Builder("Fix Thaumcraft Vis Duplication")
+            .addMixinClasses("thaumcraft.MixinTileWandPedestal_VisDuplication").setPhase(Phase.LATE).setSide(Side.BOTH)
+            .setApplyIf(() -> FixesConfig.fixWandPedestalVisDuplication).addTargetedMod(TargetedMod.THAUMCRAFT)),
+    FIX_NULL_HANDLING_ITEMWISPESSENCE_CLIENT(new Builder("Fix handling of null stacks in ItemWispEssence")
+            .addMixinClasses("thaumcraft.MixinItemWispEssence_Client").setPhase(Phase.LATE).setSide(Side.CLIENT)
+            .setApplyIf(() -> FixesConfig.fixNullHandlingItemWispEssence).addTargetedMod(TargetedMod.THAUMCRAFT)),
+    FIX_NULL_HANDLING_ITEMWISPESSENCE_BOTH(new Builder("Fix handling of null stacks in ItemWispEssence")
+            .addMixinClasses("thaumcraft.MixinItemWispEssence_Both").setPhase(Phase.LATE).setSide(Side.BOTH)
+            .setApplyIf(() -> FixesConfig.fixNullHandlingItemWispEssence).addTargetedMod(TargetedMod.THAUMCRAFT)),
+
     // BOP
     FIX_QUICKSAND_XRAY(new Builder("Fix Xray through block without collision boundingBox").setPhase(Phase.LATE)
             .setSide(Side.BOTH).addMixinClasses("biomesoplenty.MixinBlockMud_FixXray")
@@ -450,12 +604,27 @@ public enum Mixins {
     JAVA12_BOP(new Builder("BOP Java12-safe reflection").setPhase(Phase.LATE).setSide(Side.BOTH)
             .addMixinClasses("biomesoplenty.MixinBOPBiomes").addMixinClasses("biomesoplenty.MixinBOPReflectionHelper")
             .setApplyIf(() -> FixesConfig.java12BopCompat).addTargetedMod(TargetedMod.BOP)),
-
+    DISABLE_QUICKSAND_GENERATION(new Builder("Disable BOP quicksand").setPhase(Phase.LATE).setSide(Side.BOTH)
+            .addMixinClasses("biomesoplenty.MixinDisableQuicksandGeneration")
+            .setApplyIf(() -> TweaksConfig.removeBOPQuicksandGeneration).addTargetedMod(TargetedMod.BOP)),
     // COFH
     COFH_REMOVE_TE_CACHE(
             new Builder("Remove CoFH tile entity cache").addMixinClasses("minecraft.MixinWorld_CoFH_TE_Cache")
                     .setSide(Side.BOTH).setApplyIf(() -> ASMConfig.cofhWorldTransformer)
                     .addTargetedMod(TargetedMod.COFH_CORE).setPhase(Phase.EARLY)),
+    MFR_FIX_COFH_VALIDATE(new Builder("Remove CoFH TE cache usage from MFR")
+            .addMixinClasses(
+                    "minefactoryreloaded.MixinTileEntityBase",
+                    "minefactoryreloaded.MixinTileEntityRedNetCable")
+            .addTargetedMod(TargetedMod.MINEFACTORY_RELOADED).setApplyIf(() -> ASMConfig.cofhWorldTransformer)
+            .setPhase(Phase.LATE).setSide(Side.BOTH)),
+    TE_FIX_COFH_VALIDATE(new Builder("Remove CoFH TE cache usage from TE")
+            .addMixinClasses("thermalexpansion.MixinTileInventoryTileLightFalse")
+            .addTargetedMod(TargetedMod.THERMALEXPANSION).setApplyIf(() -> ASMConfig.cofhWorldTransformer)
+            .setPhase(Phase.LATE).setSide(Side.BOTH)),
+    FIX_ORE_DICT_NPE(new Builder("Fix NPE in OreDictionaryArbiter")
+            .addMixinClasses("cofhcore.MixinOreDictionaryArbiter").setPhase(Phase.EARLY).setSide(Side.BOTH)
+            .addTargetedMod(TargetedMod.COFH_CORE).setApplyIf(() -> FixesConfig.fixCofhOreDictNPE)),
 
     // Immersive engineering
     JAVA12_IMMERSIVE_ENGINERRING(new Builder("Immersive Engineering Java-12 safe potion array resizing")
@@ -518,11 +687,16 @@ public enum Mixins {
             .setPhase(Phase.LATE).setSide(Side.CLIENT).addMixinClasses("journeymap.MixinWaypointManager")
             .setApplyIf(() -> FixesConfig.fixJourneymapJumpyScrolling).addTargetedMod(TargetedMod.JOURNEYMAP)),
 
-    // Xaero's Map
+    // Xaero's World Map
     FIX_XAEROS_WORLDMAP_SCROLL(
             new Builder("Fix Xaero's World Map map screen scrolling").addMixinClasses("xaeroworldmap.MixinGuiMap")
                     .setPhase(Phase.LATE).setSide(Side.CLIENT).setApplyIf(() -> FixesConfig.fixXaerosWorldMapScroll)
                     .addTargetedMod(TargetedMod.XAEROWORLDMAP).addTargetedMod(TargetedMod.LWJGL3IFY)),
+
+    // Xaero's Minimap
+    FIX_XAEROS_MINIMAP_ENTITYDOT(new Builder("Fix Xaero's Minimap player entity dot rendering when arrow is chosen")
+            .addMixinClasses("xaerominimap.MixinMinimapRenderer").setPhase(Phase.LATE).setSide(Side.CLIENT)
+            .setApplyIf(() -> FixesConfig.fixXaerosMinimapEntityDot).addTargetedMod(TargetedMod.XAEROMINIMAP)),
 
     // Pam's Harvest the Nether
     FIX_IGNIS_FRUIT_AABB(new Builder("Ignis Fruit").setPhase(Phase.LATE).setSide(Side.BOTH)
@@ -570,6 +744,39 @@ public enum Mixins {
             .addMixinClasses("extrautilities.MixinBlockDrum").setSide(Side.BOTH).setPhase(Phase.LATE)
             .setApplyIf(() -> FixesConfig.fixExtraUtilitiesDrumEatingCells)
             .addTargetedMod(TargetedMod.EXTRA_UTILITIES)),
+    FIX_GREENSCREEN_MICROBLOCKS(new Builder("Fix extra utilities Lapis Caelestis microblocks")
+            .addMixinClasses("extrautilities.MixinFullBrightMicroMaterial").setSide(Side.CLIENT).setPhase(Phase.LATE)
+            .setApplyIf(() -> FixesConfig.fixExtraUtilitiesGreenscreenMicroblocks)
+            .addTargetedMod(TargetedMod.EXTRA_UTILITIES)),
+    FIX_LAST_MILLENIUM_RAIN(new Builder("Remove rain from the Last Millenium (Extra Utilities)")
+            .addMixinClasses("extrautilities.MixinChunkProviderEndOfTime").setPhase(Phase.LATE).setSide(Side.BOTH)
+            .setApplyIf(() -> FixesConfig.fixExtraUtilitiesLastMilleniumRain)
+            .addTargetedMod(TargetedMod.EXTRA_UTILITIES)),
+    FIX_LAST_MILLENIUM_CREATURES(new Builder("Remove creatures from the Last Millenium (Extra Utilities)")
+            .addMixinClasses("extrautilities.MixinWorldProviderEndOfTime").setPhase(Phase.LATE).setSide(Side.BOTH)
+            .setApplyIf(() -> FixesConfig.fixExtraUtilitiesLastMilleniumCreatures)
+            .addTargetedMod(TargetedMod.EXTRA_UTILITIES)),
+    FIX_FLUID_RETRIEVAL_NODE(new Builder("Prevent fluid retrieval node from voiding (Extra Utilities)")
+            .addMixinClasses("extrautilities.MixinFluidBufferRetrieval").setPhase(Phase.LATE).setSide(Side.BOTH)
+            .setApplyIf(() -> FixesConfig.fixExtraUtilitiesFluidRetrievalNode)
+            .addTargetedMod(TargetedMod.EXTRA_UTILITIES)),
+
+    // Gliby's Voice Chat
+    FIX_GLIBYS_VC_THREAD_SHUTDOWN_CLIENT(
+            new Builder("Fix Gliby's voice chat not shutting down its client thread cleanly")
+                    .addMixinClasses("glibysvoicechat.MixinClientNetwork").setPhase(Phase.LATE).setSide(Side.CLIENT)
+                    .setApplyIf(() -> FixesConfig.fixGlibysVoiceChatThreadStop)
+                    .addTargetedMod(TargetedMod.GLIBYS_VOICE_CHAT)),
+    FIX_GLIBYS_VC_THREAD_SHUTDOWN_SERVER(
+            new Builder("Fix Gliby's voice chat not shutting down its server thread cleanly")
+                    .addMixinClasses("glibysvoicechat.MixinVoiceChatServer").setPhase(Phase.LATE).setSide(Side.BOTH)
+                    .setApplyIf(() -> FixesConfig.fixGlibysVoiceChatThreadStop)
+                    .addTargetedMod(TargetedMod.GLIBYS_VOICE_CHAT)),
+
+    // PortalGun
+    PORTALGUN_FIX_URLS(new Builder("Fix URLs used to download the sound pack")
+            .addMixinClasses("portalgun.MixinThreadDownloadResources").addTargetedMod(TargetedMod.PORTAL_GUN)
+            .setApplyIf(() -> FixesConfig.fixPortalGunURLs).setPhase(Phase.LATE).setSide(Side.CLIENT)),
 
     // VoxelMap
     REPLACE_VOXELMAP_REFLECTION(new Builder("Replace VoxelMap Reflection")
@@ -589,6 +796,13 @@ public enum Mixins {
             .addMixinClasses("voxelmap.chunk.MixinCachedRegion", "voxelmap.chunk.MixinComparisonCachedRegion")
             .addTargetedMod(TargetedMod.VOXELMAP).setApplyIf(() -> FixesConfig.fixVoxelMapChunkNPE).setPhase(Phase.LATE)
             .setSide(Side.CLIENT)),
+    VOXELMAP_FILE_EXT(new Builder("Change VoxelMap cache file extension")
+            .addMixinClasses(
+                    "voxelmap.cache.MixinCachedRegion",
+                    "voxelmap.cache.MixinCachedRegion$1",
+                    "voxelmap.cache.MixinComparisonCachedRegion")
+            .addTargetedMod(TargetedMod.VOXELMAP).setApplyIf(() -> TweaksConfig.changeCacheFileExtension)
+            .setPhase(Phase.LATE).setSide(Side.CLIENT)),
 
     // Witchery
     DISABLE_POTION_ARRAY_EXTENDER(new Builder("Disable Witchery potion array extender")
@@ -599,6 +813,15 @@ public enum Mixins {
             .addMixinClasses("witchery.MixinExtendedPlayer", "witchery.MixinEntityReflection").setSide(Side.CLIENT)
             .setPhase(Phase.LATE).setApplyIf(() -> FixesConfig.fixWitcheryReflections)
             .addTargetedMod(TargetedMod.WITCHERY)),
+
+    FIX_WITCHERY_THUNDERING_DETECTION(new Builder(
+            "Fixes Witchery Thunder Detection for rituals and Witch Hunters breaking with mods modifying thunder frequency")
+                    .addMixinClasses(
+                            "witchery.MixinBlockCircle",
+                            "witchery.MixinEntityWitchHunter",
+                            "witchery.MixinRiteClimateChange")
+                    .setSide(Side.BOTH).setPhase(Phase.LATE).setApplyIf(() -> FixesConfig.fixWitcheryThunderDetection)
+                    .addTargetedMod(TargetedMod.WITCHERY)),
 
     // Various Exploits/Fixes
     GC_TIME_COMMAND_FIX(new Builder("GC Time Fix").addMixinClasses("minecraft.MixinTimeCommandGalacticraftFix")
@@ -613,6 +836,9 @@ public enum Mixins {
     ZTONES_PACKET_FIX(new Builder("Packet Fix").addMixinClasses("ztones.MixinZtonesPatchPacketExploits")
             .setPhase(Phase.LATE).setSide((Side.BOTH)).setApplyIf(() -> FixesConfig.fixZTonesPackets)
             .addTargetedMod(TargetedMod.ZTONES)),
+    ASP_RECIPE_FIX(new Builder("MT Core recipe fix").addMixinClasses("advancedsolarpanels.MixinAdvancedSolarPanel")
+            .addTargetedMod(TargetedMod.ADVANCED_SOLAR_PANELS).setApplyIf(() -> FixesConfig.fixMTCoreRecipe)
+            .setPhase(Phase.LATE).setSide(Side.BOTH)),
 
     // Unbind Keybinds by default
     UNBIND_KEYS_TRAVELLERSGEAR(new Builder("Unbind Traveller's Gear keybinds")
@@ -631,48 +857,37 @@ public enum Mixins {
             .addMixinClasses("automagy.MixinAutomagyKeyHandler").setPhase(Phase.LATE).setSide((Side.CLIENT))
             .setApplyIf(() -> TweaksConfig.unbindKeybindsByDefault).addTargetedMod(TargetedMod.AUTOMAGY)),
 
-    // Pollution
-    POLLUTION_RENDER_BLOCKS(new Builder("Changes colors of certain blocks based on pollution levels")
-            .addMixinClasses("minecraft.MixinRenderBlocks_PollutionWithoutOptifine").addTargetedMod(TargetedMod.GT5U)
-            .addTargetedMod(TargetedMod.VANILLA).addExcludedMod(TargetedMod.OPTIFINE).setSide(Side.CLIENT)
-            .setApplyIf(() -> PollutionRecolorConfig.pollutionBlockRecolor).setPhase(Phase.EARLY)),
-    POLLUTION_RENDER_BLOCKS_OPTIFINE(new Builder("Changes colors of certain blocks based on pollution levels")
-            .addMixinClasses("minecraft.MixinRenderBlocks_PollutionWithOptifine").addTargetedMod(TargetedMod.GT5U)
-            .addTargetedMod(TargetedMod.VANILLA).addTargetedMod(TargetedMod.OPTIFINE)
-            .addExcludedMod(TargetedMod.ANGELICA).setSide(Side.CLIENT)
-            .setApplyIf(() -> PollutionRecolorConfig.pollutionBlockRecolor).setPhase(Phase.EARLY)),
-    POLLUTION_RENDER_BLOCKS_BOP(new Builder("Changes colors of certain blocks based on pollution levels")
-            .addMixinClasses("biomesoplenty.MixinFoliageRenderer_Pollution").addTargetedMod(TargetedMod.GT5U)
-            .addTargetedMod(TargetedMod.BOP).setSide(Side.CLIENT)
-            .setApplyIf(() -> PollutionRecolorConfig.pollutionBlockRecolor).setPhase(Phase.LATE)),
-    POLLUTION_MINECRAFT_FURNACE(new Builder("Minecraft Furnace Pollutes").setPhase(Phase.EARLY)
-            .addMixinClasses("minecraft.MixinTileEntityFurnacePollution").setSide(Side.BOTH)
-            .setApplyIf(() -> PollutionConfig.furnacesPollute).addTargetedMod(TargetedMod.VANILLA)),
-    POLLUTION_IC2_IRON_FURNACE(new Builder("Ic2 Iron Furnace Pollutes")
-            .addMixinClasses("ic2.MixinIC2IronFurnacePollution").setPhase(Phase.LATE).setSide(Side.BOTH)
-            .setApplyIf(() -> PollutionConfig.furnacesPollute).addTargetedMod(TargetedMod.IC2)),
-    POLLUTION_THAUMCRAFT_ALCHEMICAL_FURNACE(new Builder("Thaumcraft Alchemical Construct Pollutes")
-            .addMixinClasses("thaumcraft.MixinThaumcraftAlchemyFurnacePollution").setPhase(Phase.LATE)
-            .setSide(Side.BOTH).setApplyIf(() -> PollutionConfig.furnacesPollute)
-            .addTargetedMod(TargetedMod.THAUMCRAFT)),
-    POLLUTION_RAILCRAFT(new Builder("Make Railcraft Pollute")
-            .addMixinClasses(
-                    "railcraft.MixinRailcraftBoilerPollution",
-                    "railcraft.MixinRailcraftCokeOvenPollution",
-                    "railcraft.MixinRailcraftTunnelBorePollution")
-            .setPhase(Phase.LATE).setSide(Side.BOTH).setApplyIf(() -> PollutionConfig.railcraftPollutes)
-            .addTargetedMod(TargetedMod.RAILCRAFT)),
-    POLLUTION_ROCKET(
-            new Builder("Make Rockets Pollute").addMixinClasses("galacticraftcore.MixinGalacticraftRocketPollution")
-                    .setPhase(Phase.LATE).setSide(Side.BOTH).setApplyIf(() -> PollutionConfig.rocketsPollute)
-                    .addTargetedMod(TargetedMod.GALACTICRAFT_CORE)),
     IC2_CELL(new Builder("No IC2 Cell Consumption in tanks").addMixinClasses("ic2.MixinIC2ItemCell")
             .setPhase(Phase.LATE).setSide(Side.BOTH).setApplyIf(() -> TweaksConfig.ic2CellWithContainer)
             .addTargetedMod(TargetedMod.IC2)),
     TD_NASE_PREVENTION(new Builder("Prevent NegativeArraySizeException on itemduct transfers")
             .addMixinClasses("thermaldynamics.MixinSimulatedInv").setSide(Side.BOTH)
             .setApplyIf(() -> FixesConfig.preventThermalDynamicsNASE).addTargetedMod(TargetedMod.THERMALDYNAMICS)
-            .setPhase(Phase.LATE));
+            .setPhase(Phase.LATE)),
+
+    // Chunk generation/population
+    DISABLE_CHUNK_TERRAIN_GENERATION(new Builder("Disable chunk terrain generation").setPhase(Phase.EARLY)
+            .addMixinClasses("minecraft.MixinChunkProviderServer_DisableTerrain").addTargetedMod(TargetedMod.VANILLA)
+            .setSide(Side.BOTH).setApplyIf(() -> TweaksConfig.disableChunkTerrainGeneration)),
+    DISABLE_WORLD_TYPE_CHUNK_POPULATION(
+            new Builder("Disable chunk population tied to chunk generation (ores/structure)").setPhase(Phase.EARLY)
+                    .addMixinClasses("minecraft.MixinChunkProviderServer_DisablePopulation")
+                    .addTargetedMod(TargetedMod.VANILLA).setSide(Side.BOTH)
+                    .setApplyIf(() -> TweaksConfig.disableWorldTypeChunkPopulation)),
+    DISABLE_MODDED_CHUNK_POPULATION(new Builder("Disable all other mod chunk population (e.g. Natura clouds")
+            .setPhase(Phase.EARLY).addMixinClasses("minecraft.MixinChunkProviderServer_DisableModGeneration")
+            .addTargetedMod(TargetedMod.VANILLA).setSide(Side.BOTH)
+            .setApplyIf(() -> TweaksConfig.disableModdedChunkPopulation)),
+
+    // Candycraft
+    FIX_SUGARBLOCK_NPE(new Builder("Fix NPE when interacting with sugar block")
+            .addMixinClasses("candycraft.MixinBlockSugar").setPhase(Phase.LATE).setSide(Side.BOTH)
+            .setApplyIf(() -> FixesConfig.fixCandycraftBlockSugarNPE).addTargetedMod(TargetedMod.CANDYCRAFT)),
+
+    // Morpheus
+    FIX_NOT_WAKING_PLAYERS(new Builder("Fix players not being woken properly when not everyone is sleeping")
+            .addMixinClasses("morpheus.MixinMorpheusWakePlayers").setPhase(Phase.LATE).setSide(Side.SERVER)
+            .setApplyIf(() -> FixesConfig.fixMorpheusWaking).addTargetedMod(TargetedMod.MORPHEUS));
 
     private final List<String> mixinClasses;
     private final List<TargetedMod> targetedMods;

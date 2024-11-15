@@ -5,6 +5,7 @@ import cpw.mods.fml.common.Mod;
 public enum TargetedMod {
 
     // NOTE: This doesn't work - late mods need a modid, not a coremod class
+    ADVANCED_SOLAR_PANELS("Advanced Solar Panels", null, "AdvancedSolarPanel"),
     ANGELICA("Angelica", "com.gtnewhorizons.angelica.loading.AngelicaTweaker", "angelica"),
     ARCHAICFIX("ArchaicFix", "org.embeddedt.archaicfix.ArchaicCore", "archaicfix"),
     AUTOMAGY("Automagy", null, "Automagy"),
@@ -14,11 +15,14 @@ public enum TargetedMod {
     BOP("BiomesOPlenty", null, "BiomesOPlenty"),
     BUGTORCH("BugTorch", "jss.bugtorch.mixinplugin.BugTorchEarlyMixins", "bugtorch"),
     BUKKIT("Bukkit/Thermos", "Bukkit", null),
+    CANDYCRAFT("candycraftmod", null, "candycraftmod"),
     COFH_CORE("CoFHCore", "cofh.asm.LoadingPlugin", "CoFHCore"),
+    DAMAGE_INDICATORS("Damage Indicators", null, "DamageIndicatorsMod"),
     EXTRATIC("ExtraTiC", null, "ExtraTiC"),
     EXTRA_UTILITIES("ExtraUtilities", null, "ExtraUtilities"),
     FASTCRAFT("FastCraft", "fastcraft.Tweaker"),
     GALACTICRAFT_CORE("GalacticraftCore", "micdoodle8.mods.galacticraft.core.asm.GCLoadingPlugin", "GalacticraftCore"),
+    GLIBYS_VOICE_CHAT("Gliby's Voice Chat Mod", null, "gvc"),
     GT5U("GregTech5u", null, "gregtech"), // Also matches GT6.
     GT6("GregTech6", "gregtech.asm.GT_ASM", "gregapi"), // Can be used to exclude GT6 from the GT5U target.
     GTNHLIB("GTNHLib", "com.gtnewhorizon.gtnhlib.core.GTNHLibCore", "gtnhlib"),
@@ -31,18 +35,23 @@ public enum TargetedMod {
     LOTR("The Lord of the rings mod", "lotr.common.coremod.LOTRLoadingPlugin", "lotr"),
     LWJGL3IFY("lwjgl3ify", "me.eigenraven.lwjgl3ify.core.Lwjgl3ifyCoremod", "lwjgl3ify"),
     MINECHEM("Minechem", null, "minechem"),
+    MINEFACTORY_RELOADED("MineFactory Reloaded", null, "MineFactoryReloaded"),
+    MORPHEUS("Morpheus", null, "Morpheus"),
     MRTJPCORE("MrTJPCore", null, "MrTJPCoreMod"),
     NOTENOUGHITEMS("NotEnoughItems", "codechicken.nei.asm.NEICorePlugin", "NotEnoughItems"),
     OPTIFINE("Optifine", "optifine.OptiFineForgeTweaker", "Optifine"),
+    PORTAL_GUN("PortalGun", null, "PortalGun"),
     PROJECTE("ProjectE", null, "ProjectE"),
     RAILCRAFT("Railcraft", null, "Railcraft"),
     THAUMCRAFT("Thaumcraft", null, "Thaumcraft"), // "thaumcraft.codechicken.core.launch.DepLoader"
     THERMALDYNAMICS("Thermal Dynamics", null, "ThermalDynamics"),
+    THERMALEXPANSION("Thermal Expansion", null, "ThermalExpansion"),
     TINKERSCONSTRUCT("TConstruct", null, "TConstruct"),
     TRAVELLERSGEAR("TravellersGear", null, "TravellersGear"),
     VANILLA("Minecraft", null),
-    VOXELMAP("VoxelMap", "com.thevoxelbox.voxelmap.litemod.VoxelMapTransformer"),
+    VOXELMAP("VoxelMap", "com.thevoxelbox.voxelmap.litemod.VoxelMapTransformer", "voxelmap"),
     WITCHERY("Witchery", null, "witchery"),
+    XAEROMINIMAP("Xaero's Minimap", null, "XaeroMinimap"),
     XAEROWORLDMAP("Xaero's World Map", null, "XaeroWorldMap"),
     ZTONES("ZTones", null, "Ztones");
 

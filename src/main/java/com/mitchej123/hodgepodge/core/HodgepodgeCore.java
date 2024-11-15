@@ -1,5 +1,6 @@
 package com.mitchej123.hodgepodge.core;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -8,8 +9,14 @@ import com.gtnewhorizon.gtnhlib.config.ConfigException;
 import com.gtnewhorizon.gtnhlib.config.ConfigurationManager;
 import com.gtnewhorizon.gtnhmixins.IEarlyMixinLoader;
 import com.mitchej123.hodgepodge.asm.AsmTransformers;
-import com.mitchej123.hodgepodge.config.*;
+import com.mitchej123.hodgepodge.config.ASMConfig;
+import com.mitchej123.hodgepodge.config.DebugConfig;
+import com.mitchej123.hodgepodge.config.FixesConfig;
+import com.mitchej123.hodgepodge.config.GeneralConfig;
+import com.mitchej123.hodgepodge.config.SpeedupsConfig;
+import com.mitchej123.hodgepodge.config.TweaksConfig;
 import com.mitchej123.hodgepodge.mixins.Mixins;
+import com.mitchej123.hodgepodge.util.VoxelMapCacheMover;
 
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 
@@ -23,9 +30,7 @@ public class HodgepodgeCore implements IFMLLoadingPlugin, IEarlyMixinLoader {
             ConfigurationManager.registerConfig(ASMConfig.class);
             ConfigurationManager.registerConfig(DebugConfig.class);
             ConfigurationManager.registerConfig(FixesConfig.class);
-            ConfigurationManager.registerConfig(OverallConfig.class);
-            ConfigurationManager.registerConfig(PollutionConfig.class);
-            ConfigurationManager.registerConfig(PollutionRecolorConfig.class);
+            ConfigurationManager.registerConfig(GeneralConfig.class);
             ConfigurationManager.registerConfig(SpeedupsConfig.class);
             ConfigurationManager.registerConfig(TweaksConfig.class);
         } catch (ConfigException e) {
@@ -64,7 +69,9 @@ public class HodgepodgeCore implements IFMLLoadingPlugin, IEarlyMixinLoader {
     }
 
     @Override
-    public void injectData(Map<String, Object> data) {}
+    public void injectData(Map<String, Object> data) {
+        VoxelMapCacheMover.changeFileExtensions((File) data.get("mcLocation"));
+    }
 
     @Override
     public String getAccessTransformerClass() {
